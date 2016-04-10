@@ -46,8 +46,8 @@ public:
 
     bool any_greater_than(const int3& other) const
     {
-        return other.x > x ||
-            other.y > y || other.z > z;
+        return x > other.x ||
+            y > other.y || z > other.z;
     }
 
     int3 operator-(const int3& other) const

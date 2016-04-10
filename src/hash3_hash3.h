@@ -58,8 +58,8 @@ class hash3
 		{
 		    const vect3_t& cur_vect = T::get_xyz(t);
 
-            min_pt.min_of(cur_vect);
-            max_pt.max_of(cur_vect);
+            min_pt = min_pt.min_of(cur_vect);
+            max_pt = max_pt.max_of(cur_vect);
 		}
 
 		m_d = (max_pt - min_pt) / m_sz;

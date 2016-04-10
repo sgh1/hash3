@@ -17,7 +17,8 @@ class particle
     /**
      * to work with hash3, the below needs to be
      * added -- one typedef and the two get_xyz
-     * functions.
+     * functions. The get_xyz only can return anything
+     * that has T.x, T.y, T.z
      */
 
     typedef double num_type;
@@ -41,8 +42,8 @@ class particle
 
     virtual ~particle(){};
 
-    vect3_t m_r;
-    vect3_t m_v;
+    vect3_t     m_r;
+    vect3_t     m_v;
     long int    m_idx;
 
 };
