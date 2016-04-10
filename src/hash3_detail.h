@@ -9,39 +9,6 @@ namespace hash3
 {
 
 /**
- * get_xyz
- * describes how to get the spatial position for some T
- */
-template<typename T>
-struct get_xyz{};
-
-template<>
-struct get_xyz<vector3<double>>
-{
-    static vector3<double>& get(vector3<double>& x ){
-        return x;
-    }
-    static const vector3<double>& get(const vector3<double>& x ){
-        return x;
-    }
-};
-
-/**
- * num_type
- * provides the underlying floating point type
- * of the vector type MY_VECT used in the hash
- */
-template<typename T>
-struct num_type{};
-
-template<>
-struct num_type<vector3<double>>
-{
-    typedef double type;
-};
-
-
-/**
  * default_bdry
  * any struct that def's check_hi or check_low can be
  * implemented to decide what to do when a T escapes

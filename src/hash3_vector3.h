@@ -1,4 +1,3 @@
-#pragma once
 
 #include "hash3_int3.h"
 #include <iostream>
@@ -100,7 +99,7 @@ public:
                     std::max( z, a.z) );
 	}
 
-	void min_of(const self& a)
+	self min_of(const self& a)
 	{
  	    return self(std::min( x, a.x),
                     std::min( y, a.y),
@@ -133,14 +132,33 @@ public:
 template<typename T>
 vector3<T> operator*(const T& a, const vector3<T>& v)
 {
-
+    return vector3<T>(a*v.x,a*v.y,a*v.z);
 }
+
+template<typename T>
+vector3<T> operator/(const vector3<T>& v, const hash3::int3<int>& idx)
+{
+    return  vector3<T>( v.x/T(idx.x),
+                        v.y/T(idx.y),
+                        v.z/T(idx.z)    );
+}
+
+template<typename T>
+int3<int> operator/(const vector3<T>& v, const vector3<T>& u)
+{
+    return  int3<int>(  int(v.x/u.x),
+                        int(v.y/u.y),
+                        int(v.z/u.z) );
+}
+
 
 template <typename T>
 std::ostream& operator<<(std::ostream& os, const vector3<T>& v3)
 {
     os << "(" << v3.x << "," << v3.y << "," << v3.z << ")";
+    return os;
 }
+
 
 
 }

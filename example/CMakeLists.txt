@@ -11,5 +11,5 @@ add_executable(hash_test
 	../src/hash3_detail.h
 	../src/hash3_int3.h
 	../src/hash3_vector3.h
-	
+	particle.h	
 )

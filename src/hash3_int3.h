@@ -7,7 +7,6 @@
 namespace hash3
 {
 
-
 /**
  * int3
  * minimal implementation of 3d index that
@@ -51,6 +50,27 @@ public:
             other.y > y || other.z > z;
     }
 
+    int3 operator-(const int3& other) const
+    {
+        return int3(    x-other.x,
+                        y-other.y,
+                        z-other.z   );
+    }
+
+    int3 max(const int3& other) const
+    {
+        return int3(    std::max(x,other.x),
+                        std::max(y,other.y),
+                        std::max(z,other.z) );
+    }
+
+    int3 min(const int3& other) const
+    {
+        return int3(    std::min(x,other.x),
+                        std::min(y,other.y),
+                        std::min(z,other.z) );
+    }
+
     T x,y,z;
 
 };
@@ -59,6 +79,7 @@ template <typename T>
 std::ostream& operator<<(std::ostream& os, const int3<T>& i3)
 {
     os << "(" << i3.x << "," << i3.y << "," << i3.z << ")";
+    return os;
 }
 
 }
