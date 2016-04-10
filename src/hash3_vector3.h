@@ -144,13 +144,12 @@ vector3<T> operator/(const vector3<T>& v, const hash3::int3<int>& idx)
 }
 
 template<typename T>
-int3<int> operator/(const vector3<T>& v, const vector3<T>& u)
+int3<int> vect32int3(const vector3<T>& v)
 {
-    return  int3<int>(  int(v.x/u.x),
-                        int(v.y/u.y),
-                        int(v.z/u.z) );
+    return  int3<int>(  int(v.x),
+                        int(v.y),
+                        int(v.z) );
 }
-
 
 template <typename T>
 std::ostream& operator<<(std::ostream& os, const vector3<T>& v3)

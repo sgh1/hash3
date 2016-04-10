@@ -20,7 +20,6 @@ template<
 >
 class hash3
 {
-
     public:
 
 	typedef std::vector<T> 				bin_t;
@@ -125,7 +124,7 @@ class hash3
             return;
         }
 
-        idx_t idx = r_diff / m_d;
+        idx_t idx = vect32int3(r_diff / m_d);
 
         if(!BDRY_PLCY::check_hi(idx,m_sz)){
             return;
