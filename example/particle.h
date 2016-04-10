@@ -1,19 +1,22 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
-#include "x_vector3.h"
-#include "defs.h"
+#include "hash3_vector3.h"
 
 class particle
 {
+    typedef hash3::vector3<double> vect3_t;
+
     public:
-        particle(const vector3<DATA>& v, const vector3<DATA>& r,
-            long m_id);
-        virtual ~particle();
+    particle(const vect3_t& v, const vect3_t& r,
+        long id):
+        m_v(v),m_r(r),m_idx(id)
+    {}
 
-    vector3<DATA> m_r;
-    vector3<DATA> m_v;
+    virtual ~particle(){};
 
+    vect3_t m_r;
+    vect3_t m_v;
     long int    m_idx;
 
 };

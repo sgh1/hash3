@@ -16,7 +16,7 @@ namespace hash3
 
 template<
 	typename T,
-	typename BDRY_PLCY = hash3_default_bdry,
+	typename BDRY_PLCY = default_bdry
 >
 class hash3
 {
@@ -24,8 +24,9 @@ class hash3
     public:
 
 	typedef std::vector<T> 				bin_t;
-	typedef std::size_t 				idx_t;
 	typedef typename num_type<T>::type 	num_t;
+	typedef vector3<double>             vect3_t;
+	typedef int3<int>                   idx_t;
 
     hash3():
 	    m_sz(	),
@@ -35,7 +36,7 @@ class hash3
         alloc();
 	}
 
-	hash3(const MY_VECT& p0, const MY_VECT& p1, int3 sz):
+	hash3(const vect3_t& p0, const vect3_t& p1, idx_t sz):
 	    m_sz(	sz),
 		m_p0(   p0),
 		m_d(   (p1 - p0 ) / sz )
@@ -43,7 +44,7 @@ class hash3
         alloc();
 	}
 
-	hash3(const std::vector<T>& inp, int3 sz):
+	hash3(const std::vector<T>& inp, idx_t sz):
 		m_sz(	sz)
 	{
 		alloc();
@@ -51,12 +52,12 @@ class hash3
 		num_t big = std::numeric_limits<num_t>::max();
 		num_t small = std::numeric_limits<num_t>::min();
 
-		MY_VECT min_pt( big, big, big );
-		MY_VECT max_pt( small, small, small);
+		vect3_t min_pt( big, big, big );
+		vect3_t max_pt( small, small, small);
 
 		for( const T& t : inp)
 		{
-		    const MY_VECT& cur_vect = get_xyz<T>::get(t);
+		    const vect3_t& cur_vect = get_xyz<T>::get(t);
 
             min_pt.min_of(cur_vect);
             max_pt.max_of(cur_vect);
@@ -75,11 +76,11 @@ class hash3
 
 	void print(std::ostream& os)
 	{
-	    for(size_t i = 0; i < m_isz; i++){
-            for(size_t j = 0; j < m_jsz; j++){
-                for(size_t k = 0; k < m_ksz; k++){
+	    for(size_t i = 0; i < m_sz.x; i++){
+            for(size_t j = 0; j < m_sz.y; j++){
+                for(size_t k = 0; k < m_sz.z; k++){
 
-					int3 idx(i,j,k);
+					idx_t idx(i,j,k);
                     bin_t& b = get_bin(idx);
                     os << "bin: "   << idx
                        << " has: " << std::setw(6) << b.size()
@@ -118,13 +119,13 @@ class hash3
 
 	void insert(const T& t)
 	{
-        MY_VECT r_diff = get_xyz<T>::get(t) - m_p0;
+        vect3_t r_diff = get_xyz<T>::get(t) - m_p0;
 
         if(!BDRY_PLCY::check_lo(r_diff,m_p0)){
             return;
         }
 
-        int3 idx = r_diff / m_d;
+        idx_t idx = r_diff / m_d;
 
         if(!BDRY_PLCY::check_hi(idx,m_sz)){
             return;
@@ -135,13 +136,13 @@ class hash3
 
 	void insert(T&& t)
 	{
-        MY_VECT r_diff = get_xyz<T>::get(t) - m_p0;
+        vect3_t r_diff = get_xyz<T>::get(t) - m_p0;
 
         if(!BDRY_PLCY::check_lo(r_diff,m_p0)){
             return;
         }
 
-        int3 idx = r_diff / m_d;
+        idx_t idx = r_diff / m_d;
 
         if(!BDRY_PLCY::check_hi(idx,m_sz)){
             return;
@@ -150,10 +151,10 @@ class hash3
         get_bin(idx).push_back(std::move(t));
 	}
 
-	bin_t& get_bin(const int3& idx)
+	bin_t& get_bin(const idx_t& idx)
 	{
-		idx.max(int3(0,0,0));
-		idx.min(m_sz - int3::one);
+		idx.max(idx_t(0,0,0));
+		idx.min(m_sz - idx_t(1,1,1));
 
 		int ii = idx.x*(m_sz.z*m_sz.y);
 		int jj = idx.y*m_sz.z;
@@ -197,10 +198,10 @@ class hash3
         return t;
 	}
 
-	MY_VECT					m_d;
-	int3					m_sz;
+	vect3_t					m_d;
+	idx_t					m_sz;
 	std::vector< bin_t >	m_bins;
-	MY_VECT                 m_p0;
+	vect3_t                 m_p0;
 
 };
 

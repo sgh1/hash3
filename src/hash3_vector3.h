@@ -1,12 +1,11 @@
 #pragma once
 
+#include "hash3_int3.h"
 #include <iostream>
 #include "math.h"
 
-
-
-
-
+#ifndef HASH3_VECT3_H
+#define HASH3_VECT3_H
 
 namespace hash3
 {
@@ -50,7 +49,7 @@ public:
 	{
         return self(x*a, y*a, z*a);
 	}
-	self operator*(const self& v) const;
+	self operator*(const self& v) const
 	{
         	//this cross v
         return self(    y*v.z - z*v.y,
@@ -58,70 +57,70 @@ public:
                         x*v.y - y*v.x);
 	}
 
-	self operator+(const self& a) const;
+	self operator+(const self& a) const
 	{
         return self( x+a.x, y+a.y, z+a.z);
 	}
 
-	self operator-(const self& a) const;
+	self operator-(const self& a) const
 	{
         return self( x-a.x, y-a.y, z-a.z);
 	}
 
-	self operator/(const self& a) const;
+	self operator/(const self& a) const
 	{
         return self( x/a.x, y/a.y, z/a.z);
 	}
 
-	T mag2() const;
+	T mag2() const
 	{
         return x*x + y*y + z*z;
 	}
 
 
-	T mag() const;
+	T mag() const
 	{
         return sqrt( mag2() );
 	}
 
-    self unit() const;
+    self unit() const
     {
         T   mag_inv = (1/mag());
-        T   xx	*= mag_inv;
-        T   yy	*= mag_inv;
-        T   zz	*= mag_inv;
+        T   xx	= x * mag_inv;
+        T   yy	= y * mag_inv;
+        T   zz	= z * mag_inv;
         return self(xx,yy,zz);
 	}
 
 
-	self max_of(const self& a);
+	self max_of(const self& a)
 	{
 	    return self(std::max( x, a.x),
-                    std::max( y, a.y);
+                    std::max( y, a.y),
                     std::max( z, a.z) );
 	}
 
-	void min_of(const self& a);
+	void min_of(const self& a)
 	{
  	    return self(std::min( x, a.x),
-                    std::min( y, a.y);
+                    std::min( y, a.y),
                     std::min( z, a.z) );
     }
 
-	T dot(const self& a) const;
+	T dot(const self& a) const
 	{
         return a.x*x + a.y*y + a.z*z;
 	}
 
 
-    T dist2(const self& a) const;
+    T dist2(const self& a) const
 	{
         return  (x-a.x)*(x-a.x) +
                 (y-a.y)*(y-a.y) +
-                (z-a.z)*(z-a.z) );
+                (z-a.z)*(z-a.z);
 	}
 
-	T dist(const self& a) const;
+	T dist(const self& a) const
 	{
         return sqrt(dist2(a));
 	}
@@ -138,7 +137,7 @@ vector3<T> operator*(const T& a, const vector3<T>& v)
 }
 
 template <typename T>
-std::ostream& operator<<(std::ostream& os, const vector3<T>& v3);
+std::ostream& operator<<(std::ostream& os, const vector3<T>& v3)
 {
     os << "(" << v3.x << "," << v3.y << "," << v3.z << ")";
 }

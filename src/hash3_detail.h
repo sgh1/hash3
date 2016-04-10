@@ -1,17 +1,9 @@
 
-#include <vector>
-#include <iostream>
-#include <iomanip>
-#include <limits>
-
-#include "x_vector3.h"
+#include "hash3_vector3.h"
+#include "hash3_int3.h"
 
 #ifndef HASH3_DET_H
 #define HASH3_DET_H
-
-
-
-
 
 namespace hash3
 {
@@ -58,7 +50,9 @@ struct num_type<vector3<double>>
  */
 struct default_bdry
 {
-    static bool check_hi(const int3& idx, const int3& sz){
+    typedef int3<int>                   idx_t;
+
+    static bool check_hi(const idx_t& idx, const idx_t& sz){
         if(idx.any_greater_than(sz))
         {
             return false;
@@ -84,7 +78,7 @@ struct default_bdry
 template<typename T>
 struct compare
 {
-    static bool operator()(const T& a, const T& b){
+    bool operator()(const T& a, const T& b){
         return true;
     }
 };

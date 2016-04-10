@@ -4,10 +4,6 @@
 #ifndef HASH3_INT3_H
 #define HASH3_INT3_H
 
-
-
-
-
 namespace hash3
 {
 
@@ -60,7 +56,7 @@ public:
 };
 
 template <typename T>
-std::ostream& operator<<(std::ostream& os, const int3<T>& i3);
+std::ostream& operator<<(std::ostream& os, const int3<T>& i3)
 {
     os << "(" << i3.x << "," << i3.y << "," << i3.z << ")";
 }
