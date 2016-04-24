@@ -23,10 +23,12 @@ class hash3
     public:
 
 	typedef std::vector<T> 				bin_t;
-	typedef typename T::num_type 	    num_t;
-	typedef vector3<double>             vect3_t;
+	typedef vector3<double>             my_vect3_t;
 	typedef int3<int>                   idx_t;
 
+	typedef typename T::num_type 	    num_t;
+	typedef typename T::vect_type		vect3_t;
+	
     hash3():
 	    m_sz(	),
 		m_p0(   ),
@@ -35,7 +37,7 @@ class hash3
         alloc();
 	}
 
-	hash3(const vect3_t& p0, const vect3_t& p1, idx_t sz):
+	hash3(const my_vect3_t& p0, const my_vect3_t& p1, idx_t sz):
 	    m_sz(	sz),
 		m_p0(   p0),
 		m_d(   (p1 - p0 ) / sz )
@@ -51,8 +53,8 @@ class hash3
 		num_t big = std::numeric_limits<num_t>::max();
 		num_t small = std::numeric_limits<num_t>::min();
 
-		vect3_t min_pt( big, big, big );
-		vect3_t max_pt( small, small, small);
+		my_vect3_t min_pt( big, big, big );
+		my_vect3_t max_pt( small, small, small);
 
 		for( const T& t : inp)
 		{
@@ -118,7 +120,7 @@ class hash3
 
 	void insert(const T& t)
 	{
-        vect3_t r_diff = T::get_xyz(t) - m_p0;
+        my_vect3_t r_diff = T::get_xyz(t) - m_p0;
 
         if(!BDRY_PLCY::check_lo(r_diff,m_p0)){
             return;
@@ -135,7 +137,7 @@ class hash3
 
 	void insert(T&& t)
 	{
-        vect3_t r_diff = T::get_xyz(t) - m_p0;
+        my_vect3_t r_diff = T::get_xyz(t) - m_p0;
 
         if(!BDRY_PLCY::check_lo(r_diff,m_p0)){
             return;
@@ -197,10 +199,10 @@ class hash3
         return t;
 	}
 
-	vect3_t					m_d;
+	my_vect3_t				m_d;
 	idx_t					m_sz;
 	std::vector< bin_t >	m_bins;
-	vect3_t                 m_p0;
+	my_vect3_t              m_p0;
 
 };
 

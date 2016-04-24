@@ -3,47 +3,63 @@
 
 #include "hash3_vector3.h"
 
-/**
+class myvect3d
+{
+	public:
+	
+	myvect3d(double xx, double yy, double zz):
+		x(xx),y(yy),z(zz)
+	{}
+	
+	myvect3d():
+		x(0.0),y(0.0),z(0.0)
+	{}
+		
+	double x,y,z;	
+	
+};
+
+/***
  * particle
  * simple particle class used for hash3 example
- */
+ **/
 
 class particle
 {
-    typedef hash3::vector3<double> vect3_t;
-
     public:
 
-    /**
+    /***
      * to work with hash3, the below needs to be
      * added -- one typedef and the two get_xyz
      * functions. The get_xyz only can return anything
      * that has T.x, T.y, T.z
-     */
+     **/
 
     typedef double num_type;
-
-    static const vect3_t& get_xyz(const particle& p){
+	typedef myvect3d vect_type;
+    
+        
+    static const vect_type& get_xyz(const particle& p){
         return p.m_r;
     }
 
-    static vect3_t& get_xyz(particle& p){
+    static vect_type& get_xyz(particle& p){
         return p.m_r;
     }
 
-    /**
+    /***
      * end hash3 boilerplate
-     */
+     **/
 
-    particle(const vect3_t& v, const vect3_t& r,
+    particle(const vect_type& v, const vect_type& r,
         long id):
         m_r(r),m_v(v),m_idx(id)
     {}
 
     virtual ~particle(){};
 
-    vect3_t     m_r;
-    vect3_t     m_v;
+    vect_type     m_r;
+    vect_type     m_v;
     long int    m_idx;
 
 };

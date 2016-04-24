@@ -8,7 +8,7 @@ using namespace std;
 
 int main( int argc, char* argv[] ){
 
-    typedef hash3::vector3<double> vect3_t;
+    typedef myvect3d vect3_t;
     typedef hash3::int3<int>       idx_t;
 
     std::vector<particle> particles;

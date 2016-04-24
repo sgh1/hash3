@@ -43,7 +43,7 @@ public:
 		x(i3.x),y(i3.y),z(i3.z)
 	{
 	}
-
+	
 	self operator*(const T& a) const
 	{
         return self(x*a, y*a, z*a);
@@ -71,6 +71,15 @@ public:
         return self( x/a.x, y/a.y, z/a.z);
 	}
 
+	template <typename U>
+	self& operator=(const U& other)
+	{
+		x = other.x;
+		y = other.y;
+		z = other.z;
+		return *this;
+	}
+
 	T mag2() const
 	{
         return x*x + y*y + z*z;
@@ -92,6 +101,7 @@ public:
 	}
 
 
+
 	self max_of(const self& a)
 	{
 	    return self(std::max( x, a.x),
@@ -105,6 +115,24 @@ public:
                     std::min( y, a.y),
                     std::min( z, a.z) );
     }
+    
+	template <typename U>
+	self max_of(const U& a)
+	{
+	    return self(std::max( x, a.x),
+                    std::max( y, a.y),
+                    std::max( z, a.z) );
+	}
+	
+	template <typename U>
+	self min_of(const U& a)
+	{
+ 	    return self(std::min( x, a.x),
+                    std::min( y, a.y),
+                    std::min( z, a.z) );
+    }
+
+    
 
 	T dot(const self& a) const
 	{
@@ -142,6 +170,15 @@ vector3<T> operator/(const vector3<T>& v, const hash3::int3<int>& idx)
                         v.y/T(idx.y),
                         v.z/T(idx.z)    );
 }
+
+template<typename T, typename U>
+vector3<T> operator-(const U& u, const vector3<T>& v)
+{
+    return  vector3<T>( u.x - v.x,
+                        u.y - v.y,
+                        u.z - v.z );
+}
+
 
 template<typename T>
 int3<int> vect32int3(const vector3<T>& v)
