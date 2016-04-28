@@ -27,6 +27,9 @@ int main( int argc, char* argv[] ){
 
     hash3::hash3<particle> storage(particles, idx_t(5,5,5));
 
+    storage.insert(particle(    vect3_t(0.0,0.0,0.0 ),
+                                vect3_t(1.0,1.0,1.0 ) ,0 ) );
+
     storage.print(std::cout);
 
 

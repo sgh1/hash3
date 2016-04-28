@@ -28,7 +28,7 @@ class hash3
 
 	typedef typename T::num_type 	    num_t;
 	typedef typename T::vect_type		vect3_t;
-	
+
     hash3():
 	    m_sz(	),
 		m_p0(   ),
@@ -113,13 +113,16 @@ class hash3
             for(const T& t : b){
                 ret.push_back(std::move(t));
             }
+
+            b.clear();
         }
 
         return ret;
 	}
 
-	void insert(const T& t)
-	{
+    template <typename U>
+	void insert(U&& t)
+    {
         my_vect3_t r_diff = T::get_xyz(t) - m_p0;
 
         if(!BDRY_PLCY::check_lo(r_diff,m_p0)){
@@ -132,25 +135,9 @@ class hash3
             return;
         }
 
-        get_bin(idx).push_back(t);
-	}
+        get_bin(idx).push_back(std::forward<U>(t));
 
-	void insert(T&& t)
-	{
-        my_vect3_t r_diff = T::get_xyz(t) - m_p0;
-
-        if(!BDRY_PLCY::check_lo(r_diff,m_p0)){
-            return;
-        }
-
-        idx_t idx = r_diff / m_d;
-
-        if(!BDRY_PLCY::check_hi(idx,m_sz)){
-            return;
-        }
-
-        get_bin(idx).push_back(std::move(t));
-	}
+    }
 
 	bin_t& get_bin(const idx_t& idx)
 	{
