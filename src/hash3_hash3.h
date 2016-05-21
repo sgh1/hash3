@@ -8,8 +8,9 @@
 #include "hash3_int3.h"
 #include "hash3_detail.h"
 
-#ifndef HISTO3_H
-#define HISTO3_H
+#ifndef HASH3_H
+#define HASH3_H
+
 
 namespace hash3
 {
@@ -45,7 +46,9 @@ class hash3
         alloc();
 	}
 
-	hash3(const std::vector<T>& inp, idx_t sz):
+
+    template<typename U>
+	hash3(U&& inp, idx_t sz):
 		m_sz(	sz)
 	{
 		alloc();
@@ -67,8 +70,8 @@ class hash3
 		m_d = (max_pt - min_pt) / m_sz;
 		m_p0 = min_pt;
 
-		for( const T& t : inp){
-		    insert(t);
+		for( typename ctor_std_vector_get<decltype(inp)>::ref_type t : inp){
+		    insert(ctor_std_vector_get<decltype(inp)>::get(t));
         }
 	}
 
@@ -91,6 +94,7 @@ class hash3
 	    }
 	}
 
+    //stupid simple re-hash
 	void redistribute()
 	{
         std::vector<T> all = aggregate_once();
@@ -104,9 +108,12 @@ class hash3
 		}
 	}
 
+    //move Ts out of the hash into a vector
 	std::vector<T> aggregate_once()
 	{
 	    std::vector<T> ret;
+
+	    ret.reserve(total());
 
 	    for(bin_t& b : m_bins)
         {
@@ -120,6 +127,7 @@ class hash3
         return ret;
 	}
 
+    //copy or move a T into the hash
     template <typename U>
 	void insert(U&& t)
     {
@@ -139,6 +147,7 @@ class hash3
 
     }
 
+    //get a ref. to a bin at idx
 	bin_t& get_bin(const idx_t& idx)
 	{
 		idx_t idx_2 = idx.max(idx_t(0,0,0));
@@ -176,6 +185,7 @@ class hash3
         return nullptr;
 	}
 
+    //give total Ts in hash
 	size_t total()
 	{
 	    size_t t = 0;

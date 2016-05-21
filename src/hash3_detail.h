@@ -50,6 +50,42 @@ struct compare
     }
 };
 
+
+
+/**
+ * ctor_std_vector_get
+ * describes how to move Ts in the the hash from the
+ * constructor based on whether a const vector<T>& or
+ * a vector<T>&& was supplied
+ */
+template<typename T>
+struct ctor_std_vector_get
+{
+};
+
+template<typename T>
+struct ctor_std_vector_get< const std::vector<T>& >
+{
+    using vector_value_type = T;
+    using ref_type = const vector_value_type&;
+
+    static const T& get(const T& x){
+        return x;
+    }
+};
+
+template<typename T>
+struct ctor_std_vector_get<std::vector<T>&& >
+{
+    using vector_value_type = T;
+    using ref_type = vector_value_type&;
+
+    static T&& get(T& x){
+        return std::move(x);
+    }
+};
+
+
 }
 
 

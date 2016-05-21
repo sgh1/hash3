@@ -50,10 +50,6 @@ class particle
         return p.m_r;
     }
 
-    static vect_type& get_xyz(particle& p){
-        return p.m_r;
-    }
-
     /***
      * end hash3 boilerplate
      **/
