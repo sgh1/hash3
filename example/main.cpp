@@ -4,7 +4,33 @@
 #include <iostream>
 #include <random>
 
-using namespace std;
+void create_hash3_move(std::vector<particle>& particles){
+
+    typedef myvect3d vect3_t;
+    typedef hash3::int3<int>       idx_t;
+
+    hash3::hash3<particle> storage(std::move(particles), idx_t(5,5,5));
+
+    storage.insert(particle(    vect3_t(0.0,0.0,0.0 ),
+                                vect3_t(1.0,1.0,1.0 ) ,0 ) );
+
+    storage.print(std::cout);
+
+}
+
+void create_hash3_const_ref(const std::vector<particle>& particles){
+
+    typedef myvect3d vect3_t;
+    typedef hash3::int3<int>       idx_t;
+
+    hash3::hash3<particle> storage(particles, idx_t(5,5,5));
+
+    storage.insert(particle(    vect3_t(0.0,0.0,0.0 ),
+                                vect3_t(1.0,1.0,1.0 ) ,0 ) );
+
+    storage.print(std::cout);
+
+}
 
 int main( int argc, char* argv[] ){
 
@@ -12,10 +38,7 @@ int main( int argc, char* argv[] ){
     typedef hash3::int3<int>       idx_t;
 
     std::vector<particle> particles;
-
-    // Seed with a real random value, if available
     std::random_device r;
-
     std::default_random_engine e1(r());
     std::uniform_real_distribution<double> uniform_dist(0, 10.0);
 
@@ -25,13 +48,8 @@ int main( int argc, char* argv[] ){
                                         vect3_t(uniform_dist(e1),uniform_dist(e1),uniform_dist(e1) ), i ) );
     }
 
-    hash3::hash3<particle> storage(particles, idx_t(5,5,5));
-
-    storage.insert(particle(    vect3_t(0.0,0.0,0.0 ),
-                                vect3_t(1.0,1.0,1.0 ) ,0 ) );
-
-    storage.print(std::cout);
-
+    create_hash3_const_ref(particles);
+    create_hash3_move(particles);
 
 	return 0;
 
