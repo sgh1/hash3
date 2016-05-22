@@ -1,3 +1,9 @@
+
+/*****
+*This file is part of hash3: https://github.com/sgh1/hash3
+*Please see the license and readme!
+*****/
+
 #ifndef PARTICLE_H
 #define PARTICLE_H
 

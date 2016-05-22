@@ -35,7 +35,7 @@ void create_hash3_const_ref(const std::vector<particle>& particles){
 int main( int argc, char* argv[] ){
 
     typedef myvect3d vect3_t;
-    typedef hash3::int3<int>       idx_t;
+//    typedef hash3::int3<int>       idx_t;
 
     std::vector<particle> particles;
     std::random_device r;
