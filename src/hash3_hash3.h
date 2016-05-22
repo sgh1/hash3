@@ -1,4 +1,12 @@
 
+/*****
+*This file is part of hash3: https://github.com/sgh1/hash3
+*Please see the license and readme!
+*****/
+
+#ifndef HASH3_H
+#define HASH3_H
+
 #include <vector>
 #include <iostream>
 #include <iomanip>
@@ -7,10 +15,6 @@
 #include "hash3_vector3.h"
 #include "hash3_int3.h"
 #include "hash3_detail.h"
-
-#ifndef HASH3_H
-#define HASH3_H
-
 
 namespace hash3
 {

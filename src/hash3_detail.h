@@ -1,9 +1,14 @@
 
-#include "hash3_vector3.h"
-#include "hash3_int3.h"
+/*****
+*This file is part of hash3: https://github.com/sgh1/hash3
+*Please see the license and readme!
+*****/
 
 #ifndef HASH3_DET_H
 #define HASH3_DET_H
+
+#include "hash3_vector3.h"
+#include "hash3_int3.h"
 
 namespace hash3
 {

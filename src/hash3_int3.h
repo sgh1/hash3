@@ -1,8 +1,13 @@
 
-#include <iostream>
+/*****
+*This file is part of hash3: https://github.com/sgh1/hash3
+*Please see the license and readme!
+*****/
 
 #ifndef HASH3_INT3_H
 #define HASH3_INT3_H
+
+#include <iostream>
 
 namespace hash3
 {

@@ -1,10 +1,15 @@
 
-#include "hash3_int3.h"
-#include <iostream>
-#include "math.h"
+/*****
+*This file is part of hash3: https://github.com/sgh1/hash3
+*Please see the license and readme!
+*****/
 
 #ifndef HASH3_VECT3_H
 #define HASH3_VECT3_H
+
+#include "hash3_int3.h"
+#include <iostream>
+#include "math.h"
 
 namespace hash3
 {
@@ -43,7 +48,7 @@ public:
 		x(i3.x),y(i3.y),z(i3.z)
 	{
 	}
-	
+
 	self operator*(const T& a) const
 	{
         return self(x*a, y*a, z*a);
@@ -115,7 +120,7 @@ public:
                     std::min( y, a.y),
                     std::min( z, a.z) );
     }
-    
+
 	template <typename U>
 	self max_of(const U& a)
 	{
@@ -123,7 +128,7 @@ public:
                     std::max( y, a.y),
                     std::max( z, a.z) );
 	}
-	
+
 	template <typename U>
 	self min_of(const U& a)
 	{
@@ -132,7 +137,7 @@ public:
                     std::min( z, a.z) );
     }
 
-    
+
 
 	T dot(const self& a) const
 	{
