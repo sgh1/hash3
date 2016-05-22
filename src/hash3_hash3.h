@@ -33,6 +33,7 @@ class hash3
 
 	typedef typename T::num_type 	    num_t;
 	typedef typename T::vect_type		vect3_t;
+	typedef typename std::vector< bin_t >::iterator iterator_t;
 
     hash3():
 	    m_sz(	),
@@ -166,27 +167,21 @@ class hash3
 
 	void alloc()
 	{
+        m_bins.reserve( m_sz.x*m_sz.y*m_sz.z );
+
 		for( int i = 0; i < m_sz.x*m_sz.y*m_sz.z; i++){
 			m_bins.push_back( bin_t() );
 		}
 	}
 
-	bin_t* begin()
+	iterator_t begin()
 	{
-	    if(m_bins.size() > 0){
-            return &m_bins[0];
-        }
-
-        return nullptr;
+        return m_bins.begin();
 	}
 
-	bin_t* end()
+	iterator_t end()
 	{
-        if(m_bins.size() > 0){
-            return &m_bins[m_bins.size()];
-        }
-
-        return nullptr;
+        return m_bins.end();
 	}
 
     //give total Ts in hash
