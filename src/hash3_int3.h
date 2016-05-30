@@ -76,6 +76,20 @@ public:
                         std::min(z,other.z) );
     }
 
+    //for std::map, we need a sorting order
+    //(or we can use unordered_map)
+    bool operator<(const int3& other) const
+    {
+        if(x < other.x)
+            return true;
+        else if(x == other.x && y < other.y)
+            return true;
+        else if(x == other.x && y == other.y && z < other.z)
+            return true;
+
+        return false;
+    }
+
     T x,y,z;
 
 };

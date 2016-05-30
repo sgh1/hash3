@@ -8,6 +8,7 @@
 #define HASH3_H
 
 #include <vector>
+#include <map>
 #include <iostream>
 #include <iomanip>
 #include <limits>
@@ -19,93 +20,105 @@
 namespace hash3
 {
 
-template<
-	typename T,
-	typename BDRY_PLCY = default_bdry
->
-class hash3
+template<typename T>
+class hash3_base
 {
-    public:
+public:
 
-	typedef std::vector<T> 				bin_t;
 	typedef vector3<double>             my_vect3_t;
 	typedef int3<int>                   idx_t;
 
-	typedef typename T::num_type 	    num_t;
+    using bin_t = typename bin_type<T>::type;
+
+    hash3_base():
+		m_d(   	)
+	{}
+
+	hash3_base(const my_vect3_t& d):
+		m_d(   d )
+	{}
+
+	virtual ~hash3_base(){}
+
+	void print(std::ostream& os)
+	{
+        for( auto const& bin : m_bins){
+
+            os << "bin: "   << bin.first
+               << " has: " << std::setw(6) << bin.second.size()
+               << " items \n";
+        }
+    }
+
+
+    //get a ref. to a bin at idx
+	bin_t& get_bin(const idx_t& idx){
+        return m_bins[idx];
+	}
+
+	auto begin(){
+        return m_bins.begin();
+	}
+
+	auto end(){
+        return m_bins.end();
+	}
+
+    //give total Ts in hash
+	size_t total()
+	{
+	    size_t t = 0;
+        for( auto const& bin : m_bins){
+            t += bin.second.size();
+        }
+
+        return t;
+	}
+
+	my_vect3_t  m_d;
+	std::map< idx_t, bin_t > m_bins;
+};
+
+
+template<typename T>
+class hash3 : public hash3_base<T>
+{
+    public:
+
+	typedef vector3<double>             my_vect3_t;
+	typedef int3<int>                   idx_t;
 	typedef typename T::vect_type		vect3_t;
-	typedef typename std::vector< bin_t >::iterator iterator_t;
+	typedef bin_type<T> 				bin_t;
+
+	using hash3_base<T>::m_d;
+	using hash3_base<T>::m_bins;
 
     hash3():
-	    m_sz(	),
-		m_p0(   ),
-		m_d(   	)
-	{
-        alloc();
-	}
+		hash3_base<T>(   	)
+	{}
 
-	hash3(const my_vect3_t& p0, const my_vect3_t& p1, idx_t sz):
-	    m_sz(	sz),
-		m_p0(   p0),
-		m_d(   (p1 - p0 ) / sz )
-	{
-        alloc();
-	}
-
+	hash3(const my_vect3_t& d):
+		hash3_base<T>(   d )
+	{}
 
     template<typename U>
-	hash3(U&& inp, idx_t sz):
-		m_sz(	sz)
+	hash3(U&& inp, const my_vect3_t& d):
+		hash3_base<T>(   d )
 	{
-		alloc();
-
-		num_t big = std::numeric_limits<num_t>::max();
-		num_t small = std::numeric_limits<num_t>::min();
-
-		my_vect3_t min_pt( big, big, big );
-		my_vect3_t max_pt( small, small, small);
-
-		for( const T& t : inp)
-		{
-		    const vect3_t& cur_vect = T::get_xyz(t);
-
-            min_pt = min_pt.min_of(cur_vect);
-            max_pt = max_pt.max_of(cur_vect);
-		}
-
-		m_d = (max_pt - min_pt) / m_sz;
-		m_p0 = min_pt;
-
 		for( typename ctor_std_vector_get<decltype(inp)>::ref_type t : inp){
 		    insert(ctor_std_vector_get<decltype(inp)>::get(t));
         }
 	}
 
-
-	~hash3(){}
-
-	void print(std::ostream& os)
-	{
-	    for(int i = 0; i < m_sz.x; i++){
-            for(int j = 0; j < m_sz.y; j++){
-                for(int k = 0; k < m_sz.z; k++){
-
-					idx_t idx(i,j,k);
-                    bin_t& b = get_bin(idx);
-                    os << "bin: "   << idx
-                       << " has: " << std::setw(6) << b.size()
-                       << " items \n";
-                }
-            }
-	    }
-	}
+	virtual~hash3(){}
 
     //stupid simple re-hash
 	void redistribute()
 	{
         std::vector<T> all = aggregate_once();
 
-        for( bin_t& bin : m_bins){
-            bin.clear();
+        for( auto const& bin : m_bins){
+            bin.second.clear();
         }
 
         for( const T& t : all){
@@ -118,15 +131,15 @@ class hash3
 	{
 	    std::vector<T> ret;
 
-	    ret.reserve(total());
+	    ret.reserve(this->total());
 
-	    for(bin_t& b : m_bins)
+	    for( auto const& bin : m_bins)
         {
-            for(const T& t : b){
+            for(const T& t : bin.second){
                 ret.push_back(std::move(t));
             }
 
-            b.clear();
+            bin.second.clear();
         }
 
         return ret;
@@ -136,72 +149,99 @@ class hash3
     template <typename U>
 	void insert(U&& t)
     {
-        my_vect3_t r_diff = T::get_xyz(t) - m_p0;
+        my_vect3_t  r = T::get_xyz(t) - my_vect3_t(0.0,0.0,0.0);
+        idx_t       idx = vect32int3(r / m_d);
 
-        if(!BDRY_PLCY::check_lo(r_diff,m_p0)){
-            return;
-        }
-
-        idx_t idx = vect32int3(r_diff / m_d);
-
-        if(!BDRY_PLCY::check_hi(idx,m_sz)){
-            return;
-        }
-
-        get_bin(idx).push_back(std::forward<U>(t));
-
+        m_bins[idx].push_back(std::forward<U>(t));
     }
+};
 
-    //get a ref. to a bin at idx
-	bin_t& get_bin(const idx_t& idx)
+
+
+//partial specialization for T*.  We do some things
+//a little differently here.
+
+
+template<typename T>
+class hash3<T*>: public hash3_base<T*>
+{
+    //we must use T* below.
+    public:
+
+	typedef vector3<double>             my_vect3_t;
+	typedef int3<int>                   idx_t;
+	typedef typename T::vect_type		vect3_t;
+	typedef bin_type<T*>                bin_t;
+
+    using hash3_base<T*>::m_d;
+	using hash3_base<T*>::m_bins;
+
+    hash3():
+		hash3_base<T*>( )
+	{}
+
+	hash3(const my_vect3_t& d):
+		hash3_base<T*>(   d )
+	{}
+
+	//we need another ctor here, for a vector...
+	//...of something, T*, const T*, ptr_type<T>?
+
+	virtual ~hash3(){}
+
+    //stupid simple re-hash
+	void redistribute()
 	{
-		idx_t idx_2 = idx.max(idx_t(0,0,0));
-		idx_t idx_3 = idx_2.min(m_sz - idx_t(1,1,1));
+        bin_t all = aggregate_once();
 
-		int ii = idx_3.x*(m_sz.z*m_sz.y);
-		int jj = idx_3.y*m_sz.z;
-		int kk = idx_3.z;
+        for( auto const& bin : m_bins){
+            bin.second.clear();
+        }
 
-		return m_bins[ ii + jj + kk];
-	}
-
-	void alloc()
-	{
-        m_bins.reserve( m_sz.x*m_sz.y*m_sz.z );
-
-		for( int i = 0; i < m_sz.x*m_sz.y*m_sz.z; i++){
-			m_bins.push_back( bin_t() );
+        for( const T& t : all){
+          insert(std::move(t));
 		}
 	}
 
-	iterator_t begin()
+    //move Ts out of the hash into a vector
+	bin_t aggregate_once()
 	{
-        return m_bins.begin();
-	}
+        bin_t ret;
 
-	iterator_t end()
-	{
-        return m_bins.end();
-	}
+	    ret.reserve(this->total());
 
-    //give total Ts in hash
-	size_t total()
-	{
-	    size_t t = 0;
-        for(bin_t& b : m_bins){
-            t += b.size();
+	    for( auto const& bin : m_bins)
+        {
+            for(const T& t : bin.second){
+                ret.push_back(std::move(t));
+            }
+
+            bin.second.clear();
         }
 
-        return t;
+        return ret;
 	}
 
-	my_vect3_t				m_d;
-	idx_t					m_sz;
-	std::vector< bin_t >	m_bins;
-	my_vect3_t              m_p0;
+    //copy a T into the hash
+    void insert(const T& t)
+    {
+        my_vect3_t  r = T::get_xyz(t) - my_vect3_t(0.0,0.0,0.0);
+        idx_t       idx = vect32int3(r / m_d);
+
+        m_bins[idx].push_back(
+            std::move( std::unique_ptr<T>(new T(t)) ) );
+    }
+
+    //move a unique_ptr<T> into the hash
+	void insert(std::unique_ptr<T>&& t)
+    {
+        my_vect3_t  r = T::get_xyz(t) - my_vect3_t(0.0,0.0,0.0);
+        idx_t       idx = vect32int3(r / m_d);
+
+        m_bins[idx].push_back(std::move(t));
+    }
 
 };
-
 
 }
 

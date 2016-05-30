@@ -89,7 +89,35 @@ class particle
 
 };
 
+class particle_derived : public particle
+{
 
+    particle(const vect_type& v, const vect_type& r,
+        long id):
+        m_r(r),m_v(v),m_idx(id)
+    {}
+
+    particle(const particle& x):
+        m_r(x.m_r),m_v(x.m_v),m_idx(x.m_idx)
+    {
+        #ifdef PRINT_CTOR
+            std::cout << "particle: copy ctor\n";
+        #endif
+    }
+
+    particle(particle&& x):
+        m_r(x.m_r),m_v(x.m_v),m_idx(x.m_idx)
+    {
+        #ifdef PRINT_CTOR
+            std::cout << "particle: move ctor\n";
+        #endif
+    }
+
+
+    virtual ~particle_derived(){};
+
+
+};
 
 
 
