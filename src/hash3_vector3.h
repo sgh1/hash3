@@ -49,6 +49,12 @@ public:
 	{
 	}
 
+    template<typename U>
+	explicit vector3(const U& other):
+		x(other.x),y(other.y),z(other.z)
+	{
+	}
+
 	self operator*(const T& a) const
 	{
         return self(x*a, y*a, z*a);
@@ -104,40 +110,6 @@ public:
         T   zz	= z * mag_inv;
         return self(xx,yy,zz);
 	}
-
-
-
-	self max_of(const self& a)
-	{
-	    return self(std::max( x, a.x),
-                    std::max( y, a.y),
-                    std::max( z, a.z) );
-	}
-
-	self min_of(const self& a)
-	{
- 	    return self(std::min( x, a.x),
-                    std::min( y, a.y),
-                    std::min( z, a.z) );
-    }
-
-	template <typename U>
-	self max_of(const U& a)
-	{
-	    return self(std::max( x, a.x),
-                    std::max( y, a.y),
-                    std::max( z, a.z) );
-	}
-
-	template <typename U>
-	self min_of(const U& a)
-	{
- 	    return self(std::min( x, a.x),
-                    std::min( y, a.y),
-                    std::min( z, a.z) );
-    }
-
-
 
 	T dot(const self& a) const
 	{
@@ -198,6 +170,16 @@ std::ostream& operator<<(std::ostream& os, const vector3<T>& v3)
 {
     os << "(" << v3.x << "," << v3.y << "," << v3.z << ")";
     return os;
+}
+
+template<typename V1, typename V2>
+auto dist2( const V1& a, const V2& b){
+
+    auto sum = (a.x - b.x)*(a.x - b.x) +
+            (a.y - b.y)*(a.y - b.y) +
+            (a.z - b.z)*(a.z - b.z);
+
+    return sum;
 }
 
 

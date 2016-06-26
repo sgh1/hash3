@@ -40,7 +40,7 @@ public:
 
 	virtual ~hash3_base(){}
 
-	void print(std::ostream& os)
+	void print(std::ostream& os) const
 	{
         for( auto const& bin : m_bins){
 
@@ -56,6 +56,20 @@ public:
         return m_bins[idx];
 	}
 
+	const bin_t& get_bin(const idx_t& idx) const{
+        return m_bins[idx];
+	}
+
+	bin_t& get_bin(const T& t){
+        return m_bins[hash_func(t)];
+	}
+
+	const bin_t& get_bin(const T& t) const{
+        return m_bins[hash_func(t)];
+	}
+
+    //not really vaulable until we hvave a fulll
+    //iterator
 	auto begin(){
         return m_bins.begin();
 	}
@@ -65,7 +79,7 @@ public:
 	}
 
     //give total Ts in hash
-	size_t total()
+	size_t total() const
 	{
 	    size_t t = 0;
         for( auto const& bin : m_bins){
@@ -85,13 +99,19 @@ class hash3 : public hash3_base<T>
 {
     public:
 
-	typedef vector3<double>             my_vect3_t;
-	typedef int3<int>                   idx_t;
-	typedef typename T::vect_type		vect3_t;
+	typedef vector3<double>              my_vect3_t;
+	typedef int3<int>                    idx_t;
+	typedef typename remove_ptr<T>::type value_t;
+	typedef typename value_t::vect_type		vect3_t;
 	typedef bin_type<T> 				bin_t;
 
 	using hash3_base<T>::m_d;
 	using hash3_base<T>::m_bins;
+
+	struct nearest{
+        typename bin_type<T>::type::const_iterator it;
+        double  dist;
+	};
 
     hash3():
 		hash3_base<T>(   	)
@@ -149,99 +169,135 @@ class hash3 : public hash3_base<T>
     template <typename U>
 	void insert(U&& t)
     {
-        my_vect3_t  r = T::get_xyz(t) - my_vect3_t(0.0,0.0,0.0);
-        idx_t       idx = vect32int3(r / m_d);
-
+        idx_t       idx = hash_func(t);
         m_bins[idx].push_back(std::forward<U>(t));
     }
-};
 
+    //get the nearest neighbor to 'test' in bin 'idx'
+    //note this may not be the absolute nearest neighbor
+    //todo: make const, we need to remove eg m_bins[idx]
+    //use this like: nearest_neighbor_in_bin(test) != get_bin(
+    //note, nn.dist is really dist2, todo
+    nearest nearest_neighbor_in_bin(const T& test, const idx_t& idx)
+    {
+        nearest nn;
+        nn.it = m_bins[idx].end();
+        nn.dist = std::numeric_limits<double>::max();
 
-
-//partial specialization for T*.  We do some things
-//a little differently here.
-
-
-template<typename T>
-class hash3<T*>: public hash3_base<T*>
-{
-    //we must use T* below.
-    public:
-
-	typedef vector3<double>             my_vect3_t;
-	typedef int3<int>                   idx_t;
-	typedef typename T::vect_type		vect3_t;
-	typedef bin_type<T*>                bin_t;
-
-    using hash3_base<T*>::m_d;
-	using hash3_base<T*>::m_bins;
-
-    hash3():
-		hash3_base<T*>( )
-	{}
-
-	hash3(const my_vect3_t& d):
-		hash3_base<T*>(   d )
-	{}
-
-	//we need another ctor here, for a vector...
-	//...of something, T*, const T*, ptr_type<T>?
-
-	virtual ~hash3(){}
-
-    //stupid simple re-hash
-	void redistribute()
-	{
-        bin_t all = aggregate_once();
-
-        for( auto const& bin : m_bins){
-            bin.second.clear();
-        }
-
-        for( const T& t : all){
-          insert(std::move(t));
-		}
-	}
-
-    //move Ts out of the hash into a vector
-	bin_t aggregate_once()
-	{
-        bin_t ret;
-
-	    ret.reserve(this->total());
-
-	    for( auto const& bin : m_bins)
+        for(auto it = m_bins[idx].begin(); it != m_bins[idx].end(); it++)
         {
-            for(const T& t : bin.second){
-                ret.push_back(std::move(t));
+            const T& t = *it;
+
+            //avoid finding self
+            if(test == t){
+                continue;
             }
 
-            bin.second.clear();
+            double cur_dist = dist2(
+                value_t::get_xyz(get_const_ref<T>::get(t)),
+                value_t::get_xyz(get_const_ref<T>::get(test)) );
+
+            if(cur_dist < nn.dist){
+                nn.it = it;
+                nn.dist = cur_dist;
+            }
+        }
+
+        return nn;
+    }
+
+    nearest nearest_neighbor_in_bin(const T& test){
+        return nearest_neighbor_in_bin(test,hash_func(test));
+    }
+
+    nearest nearest_neighbor(const T& test)
+    {
+        idx_t idx = hash_func(test);
+
+        nearest nn;
+        nn.it = m_bins[idx].end();
+        nn.dist = std::numeric_limits<double>::max();
+
+        if(this->total() == 0){
+            return nn;
+        }
+
+        //this can be improved.  if we already have
+        //a nn in bin idx, we don't need to search
+        //bins that are further away, sim. to kd tree
+        for(int i = idx.x - 1 ; i < idx.x + 1; i++){
+        for(int j = idx.y - 1 ; j < idx.y + 1; j++){
+        for(int k = idx.z - 1 ; k < idx.z + 1; k++)
+        {
+            idx_t idx_cur(i,j,k);
+            nearest cur_near = nearest_neighbor_in_bin(
+                test,idx_cur);
+
+            if(cur_near.it != this->get_bin(idx_cur).end())
+            {
+                if(cur_near.dist < nn.dist){
+                    nn.it = cur_near.it;
+                    nn.dist = cur_near.dist;
+                }
+            }
+        }}}
+
+        //we found something
+        if(nn.it != m_bins[idx].end()){
+            return nn;
+        }
+
+        //resort to O(n) search
+        for( auto const& bin : m_bins)
+        {
+            idx_t idx_cur(bin.first);
+            nearest cur_near = nearest_neighbor_in_bin(
+                test,idx_cur);
+
+            //or bin.second
+            if(cur_near.it != this->get_bin(idx_cur).end())
+            {
+                if(cur_near.dist < nn.dist){
+                    nn.it = cur_near.it;
+                    nn.dist = cur_near.dist;
+                }
+            }
+        }
+
+        return nn;
+    }
+
+
+
+    idx_t hash_func(const T& t)
+    {
+        idx_t ret;
+        my_vect3_t  r =
+            my_vect3_t( value_t::get_xyz(get_const_ref<T>::get(t)) );
+
+        ret.x = r.x / this->m_d.x;
+        ret.y = r.y / this->m_d.y;
+        ret.z = r.z / this->m_d.z;
+
+        // a / b is int(a) / int(b) for >=, ie,
+        //bins are [**,**)
+        if(r.x < 0.0){
+            ret.x--;
+        }
+
+        if(r.y < 0.0){
+            ret.y--;
+        }
+
+        if(r.z < 0.0){
+            ret.z--;
         }
 
         return ret;
-	}
-
-    //copy a T into the hash
-    void insert(const T& t)
-    {
-        my_vect3_t  r = T::get_xyz(t) - my_vect3_t(0.0,0.0,0.0);
-        idx_t       idx = vect32int3(r / m_d);
-
-        m_bins[idx].push_back(
-            std::move( std::unique_ptr<T>(new T(t)) ) );
     }
-
-    //move a unique_ptr<T> into the hash
-	void insert(std::unique_ptr<T>&& t)
-    {
-        my_vect3_t  r = T::get_xyz(t) - my_vect3_t(0.0,0.0,0.0);
-        idx_t       idx = vect32int3(r / m_d);
-
-        m_bins[idx].push_back(std::move(t));
-    }
-
 };
+
+
 
 }
 
