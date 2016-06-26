@@ -42,6 +42,8 @@ void create_hash3_const_ref(const std::vector<particle>& particles){
 
     std::cout << storage.total();
 
+
+
 }
 
 void create_hash3_ptr(const std::vector<particle>& particles){
