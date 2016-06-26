@@ -81,6 +81,10 @@ class particle
         #endif
     }
 
+    bool operator==(const particle& other) const{
+        return m_idx == other.m_idx;
+    }
+
     virtual ~particle(){};
 
     vect_type     m_r;
@@ -91,31 +95,31 @@ class particle
 
 class particle_derived : public particle
 {
+    public:
 
-    particle(const vect_type& v, const vect_type& r,
+    particle_derived(const vect_type& v, const vect_type& r,
         long id):
-        m_r(r),m_v(v),m_idx(id)
+        particle(v,r,id)
     {}
 
-    particle(const particle& x):
-        m_r(x.m_r),m_v(x.m_v),m_idx(x.m_idx)
+    particle_derived(const particle_derived& x):
+        particle(x)
     {
         #ifdef PRINT_CTOR
-            std::cout << "particle: copy ctor\n";
+            std::cout << "particle derived: copy ctor\n";
         #endif
     }
 
-    particle(particle&& x):
-        m_r(x.m_r),m_v(x.m_v),m_idx(x.m_idx)
+    particle_derived(particle_derived&& x):
+        particle(std::move(x))
     {
         #ifdef PRINT_CTOR
-            std::cout << "particle: move ctor\n";
+            std::cout << "particle derived: move ctor\n";
         #endif
     }
 
 
     virtual ~particle_derived(){};
-
 
 };
 

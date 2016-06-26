@@ -30,6 +30,14 @@ void create_hash3_const_ref(const std::vector<particle>& particles){
     storage.insert(particle(    vect3_t(0.0,0.0,0.0 ),
                                 vect3_t(2.0,2.0,2.0 ) ,0 ) );
 
+    particle p( vect3_t(0.0,0.0,0.0 ),
+        vect3_t(2.0,2.0,2.0 ) ,0 );
+
+    storage.nearest_neighbor_in_bin(p,
+        storage.hash_func(p) );
+
+    storage.nearest_neighbor(particles.back());
+
     storage.print(std::cout);
 
     std::cout << storage.total();
@@ -43,7 +51,7 @@ void create_hash3_ptr(const std::vector<particle>& particles){
     hash3::hash3<particle*> storage(
         hash3::hash3<particle*>::my_vect3_t(1.,1.,1.));
 
-    storage.insert(particle(    vect3_t(0.0,0.0,0.0 ),
+    storage.insert(new particle(    vect3_t(0.0,0.0,0.0 ),
                                 vect3_t(2.0,2.0,2.0 ) ,0 ) );
 
     storage.print(std::cout);
