@@ -248,6 +248,21 @@ class hash3 : public hash3_base<T>
         }
 
         //resort to O(n) search
+        return nearest_neighbor_naive(test);
+    }
+
+    nearest nearest_neighbor_naive(const T& test)
+    {
+        idx_t idx = hash_func(test);
+
+        nearest nn;
+        nn.it = m_bins[idx].end();
+        nn.dist = std::numeric_limits<double>::max();
+
+        if(this->total() == 0){
+            return nn;
+        }
+
         for( auto const& bin : m_bins)
         {
             idx_t idx_cur(bin.first);
@@ -264,8 +279,13 @@ class hash3 : public hash3_base<T>
             }
         }
 
+        if(nn.it != m_bins[idx].end()){
+            //error;
+        }
+
         return nn;
     }
+
 
 
 

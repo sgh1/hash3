@@ -1,6 +1,7 @@
 #include "particle.h"
 #include "hash3_hash3.h"
 
+#include <chrono>
 #include <iostream>
 #include <random>
 
@@ -28,7 +29,7 @@ void create_hash3_const_ref(const std::vector<particle>& particles){
         hash3::hash3<particle>::my_vect3_t(1.,1.,1.));
 
     storage.insert(particle(    vect3_t(0.0,0.0,0.0 ),
-                                vect3_t(2.0,2.0,2.0 ) ,0 ) );
+                                vect3_t(2.0,2.0,2.0 ) , particles.size() + 1 ) );
 
     particle p( vect3_t(0.0,0.0,0.0 ),
         vect3_t(2.0,2.0,2.0 ) ,0 );
@@ -42,12 +43,30 @@ void create_hash3_const_ref(const std::vector<particle>& particles){
 
     std::cout << storage.total();
 
+    std::chrono::time_point<std::chrono::system_clock> start, end;
+
+    start = std::chrono::system_clock::now();
+
+    for(const particle& p : particles){
+        storage.nearest_neighbor_naive(p);
+    }
+
+    end = std::chrono::system_clock::now();
+
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    std::cout << "\nelapsed time, naive search: " << elapsed_seconds.count() << "s\n";
 
 
+    start = std::chrono::system_clock::now();
 
+    for(const particle& p : particles){
+        storage.nearest_neighbor(p);
+    }
 
+    end = std::chrono::system_clock::now();
 
-
+    elapsed_seconds = end-start;
+    std::cout << "elapsed time, hash3 search: " << elapsed_seconds.count() << "s\n";
 
 
 
@@ -84,7 +103,7 @@ int main( int argc, char* argv[] ){
     }
 
     create_hash3_const_ref(particles);
-    create_hash3_move(particles);
+    //create_hash3_move(particles);
 
 
 	return 0;
