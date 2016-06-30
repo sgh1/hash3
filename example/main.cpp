@@ -1,6 +1,7 @@
 #include "particle.h"
 #include "hash3_hash3.h"
 
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <random>
@@ -68,6 +69,10 @@ void create_hash3_const_ref(const std::vector<particle>& particles){
     elapsed_seconds = end-start;
     std::cout << "elapsed time, hash3 search: " << elapsed_seconds.count() << "s\n";
 
+    std::for_each(storage.begin(), storage.end(),
+        [](particle &p){
+            p.m_idx++;
+        });
 
 
 }

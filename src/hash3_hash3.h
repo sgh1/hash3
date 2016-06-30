@@ -7,11 +7,16 @@
 #ifndef HASH3_H
 #define HASH3_H
 
+#include <cassert>      // assert
+#include <cstddef>      // ptrdiff_t
+#include <iterator>     // iterator
+#include <type_traits>  // remove_cv
 #include <vector>
 #include <map>
 #include <iostream>
 #include <iomanip>
 #include <limits>
+#include <utility>      // swap
 
 #include "hash3_vector3.h"
 #include "hash3_int3.h"
@@ -20,6 +25,7 @@
 namespace hash3
 {
 
+
 template<typename T>
 class hash3_base
 {
@@ -27,8 +33,103 @@ public:
 
 	typedef vector3<double>             my_vect3_t;
 	typedef int3<int>                   idx_t;
-
     using bin_t = typename bin_type<T>::type;
+
+    typedef typename bin_t::iterator    vect_iter_t;
+    typedef typename std::map<idx_t,bin_t>::iterator    map_iter_t;
+
+
+    template<
+            class U,
+            class UnqualifiedType = std::remove_cv_t<T>>
+    class ForwardIterator
+        : public std::iterator<std::forward_iterator_tag,
+                               UnqualifiedType,
+                               std::ptrdiff_t,
+                               U*,
+                               U&>
+    {
+        public:
+
+        typedef typename hash3_base<U>::vect_iter_t iter_vect_iter_t;
+        typedef typename hash3_base<U>::map_iter_t  iter_map_iter_t;
+
+        iter_vect_iter_t        m_v_itr;
+        iter_map_iter_t         m_m_itr;
+        const hash3_base<U>*    m_hash;
+
+        explicit ForwardIterator(iter_vect_iter_t vect_it, iter_map_iter_t map_it,
+            const hash3_base<U>* hash_p):
+            m_v_itr(vect_it),
+            m_m_itr(map_it),
+            m_hash(hash_p)
+        {
+        }
+
+        //we break with standard if we don't provide a default
+        //constructor, but we really have no sense of default
+        //for this iterator
+
+        //ForwardIterator()   // Default construct gives end.
+        //    : itr(nullptr)
+        //{
+        //}
+
+
+        ForwardIterator& operator++ () // Pre-increment
+        {
+            iter_vect_iter_t new_vect_it =
+                m_hash->next_vect_it(m_m_itr,m_v_itr);
+
+            iter_map_iter_t new_map_it =
+                m_hash->next_map_it(m_m_itr,m_v_itr);
+
+            m_m_itr = new_map_it;
+            m_v_itr = new_vect_it;
+
+            return *this;
+        }
+
+        ForwardIterator operator++ (int) // Post-increment
+        {
+            //assert(itr != nullptr && "Out-of-bounds iterator increment!");
+            ForwardIterator tmp(*this);
+
+            iter_vect_iter_t new_vect_it =
+                m_hash->next_vect_it(m_m_itr,m_v_itr);
+
+            iter_map_iter_t new_map_it =
+                m_hash->next_map_it(m_m_itr,m_v_itr);
+
+            m_m_itr = new_map_it;
+            m_v_itr = new_vect_it;
+
+            return tmp;
+        }
+
+        U& operator* () const{
+            return *m_v_itr;
+        }
+
+        U& operator-> () const{
+            return m_v_itr.operator->();
+        }
+
+        // two-way comparison: v.begin() == v.cbegin() and vice versa
+        // only have to compare vector iterator
+        template<class OtherType>
+        bool operator == (const ForwardIterator<OtherType>& rhs) const{
+            return m_v_itr == rhs.m_v_itr;
+        }
+
+        template<class OtherType>
+        bool operator != (const ForwardIterator<OtherType>& rhs) const{
+            return m_v_itr != rhs.m_v_itr;
+        }
+    };
+
+    typedef ForwardIterator<T>          iterator;
+    typedef ForwardIterator<const T>    const_iterator;
 
     hash3_base():
 		m_d(   	)
@@ -68,15 +169,64 @@ public:
         return m_bins[hash_func(t)];
 	}
 
-    //not really vaulable until we hvave a fulll
-    //iterator
-	auto begin(){
-        return m_bins.begin();
-	}
 
-	auto end(){
-        return m_bins.end();
-	}
+    iterator begin(){
+        return iterator(m_bins.begin().second.begin(),
+                        m_bins.begin(),
+                        this);
+    }
+
+    iterator end(){
+        return iterator(m_bins.rbegin().second.end(),
+                        m_bins.end(),
+                        this);
+    }
+
+    const_iterator cbegin() const{
+        return const_iterator(  m_bins.begin().second.begin(),
+                                m_bins.begin(),
+                                this);
+    }
+    const_iterator cend() const{
+        return const_iterator(  m_bins.rbegin().second.end(),
+                                m_bins.end(),
+                                this);
+    }
+
+    map_iter_t next_map_it(map_iter_t mit, vect_iter_t vit) const{
+
+        //we have more bins
+        if(mit != m_bins.end()--){
+            throw "iterator out of bounds!\n";
+        }
+
+        return mit++;
+    }
+
+    //check the state of mit and vit, and return a new vector iterator
+    vect_iter_t next_vect_it(map_iter_t mit, vect_iter_t vit) const{
+
+        //we have more bins
+        if(mit != m_bins.end()--)
+        {
+            if(vit == mit->second.end()--){
+                return (mit++)->second.begin();
+            }
+            else{
+                return vit++;
+            }
+        }
+
+        //we're on the last bin, if vit is at .back(), go to
+        //.end, if we're already at .end(), we've made a mistake
+        //check
+        if(m_bins.back().second.end() == vit){
+            throw "iterator out of bounds!\n";
+        }
+
+        return vit++;
+    }
+
 
     //give total Ts in hash
 	size_t total() const
