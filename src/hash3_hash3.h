@@ -169,25 +169,47 @@ public:
         return m_bins[hash_func(t)];
 	}
 
+    ///in order for these to work correctly,
+    ///bins of 0 size are prohibited!
 
-    iterator begin(){
-        return iterator(m_bins.begin().second.begin(),
+    void prune()
+    {
+        auto itr = m_bins.begin();
+        while (itr != m_bins.end())
+        {
+            if (itr->second.size() == 0) {
+               itr = m_bins.erase(itr);
+            } else {
+               ++itr;
+            }
+        }
+    }
+
+    iterator begin()
+    {
+        prune();
+
+        return iterator(m_bins.begin()->second.begin(),
                         m_bins.begin(),
                         this);
     }
 
     iterator end(){
-        return iterator(m_bins.rbegin().second.end(),
-                        m_bins.end(),
+        return iterator(m_bins.rbegin()->second.end(),
+                        m_bins.end(),   //not valid or checked, only vector iterator is compared
                         this);
     }
 
-    const_iterator cbegin() const{
+    //want these to be const...but for prune..?
+    const_iterator cbegin()
+    {
+        prune();
+
         return const_iterator(  m_bins.begin().second.begin(),
                                 m_bins.begin(),
                                 this);
     }
-    const_iterator cend() const{
+    const_iterator cend(){
         return const_iterator(  m_bins.rbegin().second.end(),
                                 m_bins.end(),
                                 this);
@@ -195,12 +217,21 @@ public:
 
     map_iter_t next_map_it(map_iter_t mit, vect_iter_t vit) const{
 
-        //we have more bins
-        if(mit != m_bins.end()--){
-            throw "iterator out of bounds!\n";
+        //we have more bins.  we iterate to map.begin(), vect.end(),
+        //so we should never get to mit.end()
+        if(mit != m_bins.end()--)
+        {
+            if(vit == mit->second.end()--){
+                mit++;
+                std::cout << "moving to bin" << (mit)->first << "\n";
+                return mit;
+            }
+
+            return mit;
         }
 
-        return mit++;
+        throw "iterator out of bounds!\n";
+        return mit;
     }
 
     //check the state of mit and vit, and return a new vector iterator
@@ -210,21 +241,22 @@ public:
         if(mit != m_bins.end()--)
         {
             if(vit == mit->second.end()--){
-                return (mit++)->second.begin();
+                mit++;
+                return (mit)->second.begin();
             }
             else{
-                return vit++;
+                return ++vit;
             }
         }
 
         //we're on the last bin, if vit is at .back(), go to
         //.end, if we're already at .end(), we've made a mistake
         //check
-        if(m_bins.back().second.end() == vit){
+        if(m_bins.rbegin()->second.end() == vit){
             throw "iterator out of bounds!\n";
         }
 
-        return vit++;
+        return ++vit;
     }
 
 
@@ -312,6 +344,8 @@ class hash3 : public hash3_base<T>
             bin.second.clear();
         }
 
+        //reset the map
+        m_bins = std::map<idx_t,bin_t>();
         return ret;
 	}
 

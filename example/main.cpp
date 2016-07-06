@@ -69,10 +69,16 @@ void create_hash3_const_ref(const std::vector<particle>& particles){
     elapsed_seconds = end-start;
     std::cout << "elapsed time, hash3 search: " << elapsed_seconds.count() << "s\n";
 
+
+    auto it = storage.m_bins.begin();
+
+    std::cout << it->second.size();
+
     std::for_each(storage.begin(), storage.end(),
         [](particle &p){
-            p.m_idx++;
+            std::cout << p.m_idx << "\n";
         });
+
 
 
 }
@@ -101,7 +107,7 @@ int main( int argc, char* argv[] ){
     std::default_random_engine e1(r());
     std::uniform_real_distribution<double> uniform_dist(0, 10.0);
 
-    for(int i = 0; i < 5000; i++)
+    for(int i = 0; i < 50; i++)
     {
         particles.push_back( particle(  vect3_t(uniform_dist(e1),uniform_dist(e1),uniform_dist(e1) ),
                                         vect3_t(uniform_dist(e1),uniform_dist(e1),uniform_dist(e1) ), i ) );
