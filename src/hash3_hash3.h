@@ -219,18 +219,19 @@ public:
 
         //we have more bins.  we iterate to map.begin(), vect.end(),
         //so we should never get to mit.end()
-        if(mit != m_bins.end()--)
+        if(mit != --(m_bins.end()))
         {
-            if(vit == mit->second.end()--){
+            if(vit == --(mit->second.end())){
                 mit++;
-                std::cout << "moving to bin" << (mit)->first << "\n";
+                //std::cout << "moving to bin" << (mit)->first << "\n";
                 return mit;
             }
 
             return mit;
         }
 
-        throw "iterator out of bounds!\n";
+        //valid iff vit is at end, todo
+        //throw "iterator out of bounds!\n";
         return mit;
     }
 
@@ -238,11 +239,11 @@ public:
     vect_iter_t next_vect_it(map_iter_t mit, vect_iter_t vit) const{
 
         //we have more bins
-        if(mit != m_bins.end()--)
+        if(mit != --(m_bins.end()))
         {
-            if(vit == mit->second.end()--){
+            if(vit == --(mit->second.end())){
                 mit++;
-                return (mit)->second.begin();
+                return mit->second.begin();
             }
             else{
                 return ++vit;

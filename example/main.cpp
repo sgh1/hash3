@@ -74,11 +74,12 @@ void create_hash3_const_ref(const std::vector<particle>& particles){
 
     std::cout << it->second.size();
 
+    int i = 0;
     std::for_each(storage.begin(), storage.end(),
-        [](particle &p){
-            std::cout << p.m_idx << "\n";
+        [&i](particle &p){
+            i++;
+            std::cout << "iter: " << i << " particle idx: " << p.m_idx << "\n";
         });
-
 
 
 }
