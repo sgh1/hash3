@@ -76,10 +76,18 @@ void create_hash3_const_ref(const std::vector<particle>& particles){
 
     int i = 0;
     std::for_each(storage.begin(), storage.end(),
-        [&i](particle &p){
+        [&i,&storage](particle &p){
+
             i++;
             std::cout << "iter: " << i << " particle idx: " << p.m_idx << "\n";
+
+            storage.for_each_neighbor(p,[&i](particle& p1, particle& p2)
+            {
+                std::cout << "\t colliding " << p1.m_idx << " with " << p2.m_idx << "\n";
+            });
         });
+
+
 
 
 }

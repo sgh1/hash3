@@ -471,7 +471,40 @@ class hash3 : public hash3_base<T>
         return nn;
     }
 
+    //I think we want U&& here. we ant U&& to be
+    //somethin related to T, but it can be hacked, I suppose,
+    //to do other things
+    template<typename U, typename FUNC>
+    void for_each_neighbor(U& test, const FUNC& f)
+    {
+        idx_t idx = hash_func(test);
 
+        if(this->total() == 0){
+            return;
+        }
+
+        //this can be improved.  if we already have
+        //a nn in bin idx, we don't need to search
+        //bins that are further away, sim. to kd tree
+        for(int i = idx.x - 1 ; i < idx.x + 1; i++){
+        for(int j = idx.y - 1 ; j < idx.y + 1; j++){
+        for(int k = idx.z - 1 ; k < idx.z + 1; k++)
+        {
+            idx_t idx_cur(i,j,k);
+            typename bin_type<T>::type& cur_bin = m_bins[idx_cur];
+
+            for(T& t: cur_bin)
+            {
+                if(t == test){
+                    continue;
+                }
+
+                f(test,t);
+            }
+        }}}
+
+        return;
+    }
 
 
     idx_t hash_func(const T& t)
