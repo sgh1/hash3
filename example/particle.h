@@ -81,6 +81,19 @@ class particle
         #endif
     }
 
+    particle& operator=(const particle& other){
+
+        // check for self-assignment
+        if(&other == this)
+            return *this;
+
+        m_r = other.m_r;
+        m_v = other.m_v;
+        m_idx = other.m_idx;
+
+        return *this;
+    }
+
     bool operator==(const particle& other) const{
         return m_idx == other.m_idx;
     }

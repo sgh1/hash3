@@ -51,6 +51,7 @@ struct ctor_std_vector_get<std::vector<T>&& >
  * bin_type
  * describes what the bucket type will be for
  * a type, T.
+ * todo: remove
 */
 
 
@@ -58,12 +59,6 @@ template<typename T>
 struct bin_type{
     using type =  std::vector<T>;
 };
-
-//template<typename T>
-//struct bin_type<T*>{
-//    using type = std::vector<std::unique_ptr<T>>;
-//};
-
 
 
 
@@ -76,6 +71,8 @@ template<typename T>
 struct remove_ptr<T*>{
     using type = T;
 };
+
+
 
 
 template<typename T>

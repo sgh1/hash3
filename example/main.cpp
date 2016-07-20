@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <fstream>
 #include <iostream>
 #include <random>
 
@@ -24,25 +25,21 @@ void create_hash3_move(std::vector<particle>& particles){
 void create_hash3_const_ref(const std::vector<particle>& particles){
 
     typedef myvect3d vect3_t;
-  //  typedef hash3::int3<int>       idx_t;
 
     hash3::hash3<particle> storage(particles,
         hash3::hash3<particle>::my_vect3_t(1.,1.,1.));
 
-    storage.insert(particle(    vect3_t(0.0,0.0,0.0 ),
-                                vect3_t(2.0,2.0,2.0 ) , particles.size() + 1 ) );
+    //storage.insert(particle(    vect3_t(0.0,0.0,0.0 ),
+    //                            vect3_t(2.0,2.0,2.0 ) , storage.total() ) );
 
     particle p( vect3_t(0.0,0.0,0.0 ),
-        vect3_t(2.0,2.0,2.0 ) ,0 );
+                vect3_t(2.0,2.0,2.0 ), storage.total() );
 
-    storage.nearest_neighbor_in_bin(p,
-        storage.hash_func(p) );
-
+    storage.nearest_neighbor_in_bin(p);
     storage.nearest_neighbor(particles.back());
-
     storage.print(std::cout);
 
-    std::cout << storage.total();
+    std::cout << "total T's: " << storage.total() << "\n";
 
     std::chrono::time_point<std::chrono::system_clock> start, end;
 
@@ -59,34 +56,61 @@ void create_hash3_const_ref(const std::vector<particle>& particles){
 
 
     start = std::chrono::system_clock::now();
-
     for(const particle& p : particles){
         storage.nearest_neighbor(p);
     }
-
     end = std::chrono::system_clock::now();
 
     elapsed_seconds = end-start;
     std::cout << "elapsed time, hash3 search: " << elapsed_seconds.count() << "s\n";
 
+    auto collide_f = [](particle& p1, particle& p2)
+    {
+        double d2 = p1.m_r.x*p1.m_r.x +
+                    p1.m_r.y*p1.m_r.y +
+                    p1.m_r.z*p1.m_r.z;
 
-    auto it = storage.m_bins.begin();
-
-    std::cout << it->second.size();
+        if(d2 < 1e-5){
+            p1.m_v.x *= -1.0;
+            p1.m_v.y *= -1.0;
+            p1.m_v.z *= -1.0;
+        }
+    };
 
     int i = 0;
+    double dt = 1e-5;
     std::for_each(storage.begin(), storage.end(),
-        [&i,&storage](particle &p){
+        [&i,&storage,collide_f,dt](particle &p)
+        {
+            storage.for_each_neighbor(p,collide_f);
 
-            i++;
-            std::cout << "iter: " << i << " particle idx: " << p.m_idx << "\n";
-
-            storage.for_each_neighbor(p,[&i](particle& p1, particle& p2)
-            {
-                std::cout << "\t colliding " << p1.m_idx << " with " << p2.m_idx << "\n";
-            });
+            p.m_r.x += dt*p.m_v.x;
+            p.m_r.y += dt*p.m_v.y;
+            p.m_r.z += dt*p.m_v.z;
         });
 
+    std::vector<particle> particles_updated =
+        storage.aggregate_once();
+
+    std::sort(  particles_updated.begin(),
+                particles_updated.end(),
+                [](particle& a, particle &b){
+                    return a.m_idx < b.m_idx;
+                });
+
+    std::ofstream f("particles_hash_updated");
+    for( const particle& p : particles_updated)
+    {
+        f   << std::setw(20) << p.m_idx << " "
+            << std::setw(20) << p.m_r.x << " "
+            << std::setw(20) << p.m_r.y << " "
+            << std::setw(20) << p.m_r.z << " "
+            << std::setw(20) << p.m_v.x << " "
+            << std::setw(20) << p.m_v.y << " "
+            << std::setw(20) << p.m_v.z << "\n";
+    }
+
+    f.close();
 
 
 
@@ -109,14 +133,13 @@ void create_hash3_ptr(const std::vector<particle>& particles){
 int main( int argc, char* argv[] ){
 
     typedef myvect3d vect3_t;
-//    typedef hash3::int3<int>       idx_t;
 
     std::vector<particle> particles;
     std::random_device r;
     std::default_random_engine e1(r());
     std::uniform_real_distribution<double> uniform_dist(0, 10.0);
 
-    for(int i = 0; i < 50; i++)
+    for(int i = 0; i < 500; i++)
     {
         particles.push_back( particle(  vect3_t(uniform_dist(e1),uniform_dist(e1),uniform_dist(e1) ),
                                         vect3_t(uniform_dist(e1),uniform_dist(e1),uniform_dist(e1) ), i ) );

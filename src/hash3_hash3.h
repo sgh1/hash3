@@ -66,15 +66,12 @@ public:
         {
         }
 
-        //we break with standard if we don't provide a default
-        //constructor, but we really have no sense of default
-        //for this iterator
-
-        //ForwardIterator()   // Default construct gives end.
-        //    : itr(nullptr)
-        //{
-        //}
-
+        ForwardIterator():
+            m_v_itr(),
+            m_m_itr(),
+            m_hash(nullptr)
+        {
+        }
 
         ForwardIterator& operator++ () // Pre-increment
         {
@@ -313,21 +310,18 @@ class hash3 : public hash3_base<T>
         }
 	}
 
+//    template<typename U>
+//    hash3(const hash3&& other, const my_vect3_t& d):
+//		hash3_base<T>(   d )
+//    {
+//        std::vector<T> all = other.aggregate_once();
+//
+//		for( typename ctor_std_vector_get<decltype(inp)>::ref_type t : all){
+//		    insert(ctor_std_vector_get<decltype(inp)>::get(t));
+//        }
+//    }
+//
 	virtual~hash3(){}
-
-    //stupid simple re-hash
-	void redistribute()
-	{
-        std::vector<T> all = aggregate_once();
-
-        for( auto const& bin : m_bins){
-            bin.second.clear();
-        }
-
-        for( const T& t : all){
-          insert(std::move(t));
-		}
-	}
 
     //move Ts out of the hash into a vector
 	std::vector<T> aggregate_once()
@@ -336,17 +330,15 @@ class hash3 : public hash3_base<T>
 
 	    ret.reserve(this->total());
 
-	    for( auto const& bin : m_bins)
+	    for( const auto& bin : m_bins)
         {
             for(const T& t : bin.second){
                 ret.push_back(std::move(t));
             }
-
-            bin.second.clear();
         }
 
         //reset the map
-        m_bins = std::map<idx_t,bin_t>();
+        m_bins.clear();
         return ret;
 	}
 
@@ -483,9 +475,7 @@ class hash3 : public hash3_base<T>
             return;
         }
 
-        //this can be improved.  if we already have
-        //a nn in bin idx, we don't need to search
-        //bins that are further away, sim. to kd tree
+        //for each neighbor (and this) bin
         for(int i = idx.x - 1 ; i < idx.x + 1; i++){
         for(int j = idx.y - 1 ; j < idx.y + 1; j++){
         for(int k = idx.z - 1 ; k < idx.z + 1; k++)
@@ -493,6 +483,8 @@ class hash3 : public hash3_base<T>
             idx_t idx_cur(i,j,k);
             typename bin_type<T>::type& cur_bin = m_bins[idx_cur];
 
+            //still a little work to do, what should
+            //this type be?
             for(T& t: cur_bin)
             {
                 if(t == test){
