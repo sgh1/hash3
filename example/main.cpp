@@ -77,16 +77,24 @@ void create_hash3_const_ref(const std::vector<particle>& particles){
         }
     };
 
+    auto advance_f = [](particle& p, double dt)
+    {
+        p.m_r.x += dt*p.m_v.x;
+        p.m_r.y += dt*p.m_v.y;
+        p.m_r.z += dt*p.m_v.z;
+    };
+
+
     int i = 0;
     double dt = 1e-5;
     std::for_each(storage.begin(), storage.end(),
-        [&i,&storage,collide_f,dt](particle &p)
+        [&i,&storage,collide_f,advance_f,dt](particle &p)
         {
+            //collide to see if particle changes direction
             storage.for_each_neighbor(p,collide_f);
 
-            p.m_r.x += dt*p.m_v.x;
-            p.m_r.y += dt*p.m_v.y;
-            p.m_r.z += dt*p.m_v.z;
+            //advance the particle
+            advance_f(p,dt);
         });
 
     std::vector<particle> particles_updated =
@@ -111,6 +119,35 @@ void create_hash3_const_ref(const std::vector<particle>& particles){
     }
 
     f.close();
+
+    //do the same with raw vector
+
+    std::vector<particle> particles_copy(particles);
+
+    for(particle& p1 : particles_copy)
+    {
+        for(particle& p2 : particles_copy)
+        {
+            collide_f(p1,p2);
+        }
+
+        advance_f(p1,dt);
+    }
+
+    std::ofstream f2("particles_n2_updated");
+    for( const particle& p : particles_copy)
+    {
+        f2   << std::setw(20) << p.m_idx << " "
+            << std::setw(20) << p.m_r.x << " "
+            << std::setw(20) << p.m_r.y << " "
+            << std::setw(20) << p.m_r.z << " "
+            << std::setw(20) << p.m_v.x << " "
+            << std::setw(20) << p.m_v.y << " "
+            << std::setw(20) << p.m_v.z << "\n";
+    }
+
+    f2.close();
+
 
 
 
