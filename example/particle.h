@@ -9,6 +9,7 @@
 
 #include "hash3_vector3.h"
 
+#include <iomanip>
 #include <iostream>
 
 //#define PRINT_CTOR
@@ -96,6 +97,20 @@ class particle
 
     bool operator==(const particle& other) const{
         return m_idx == other.m_idx;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const particle& p)
+    {
+
+        os   << std::setw(20) << p.m_idx << " "
+            << std::setw(20) << p.m_r.x << " "
+            << std::setw(20) << p.m_r.y << " "
+            << std::setw(20) << p.m_r.z << " "
+            << std::setw(20) << p.m_v.x << " "
+            << std::setw(20) << p.m_v.y << " "
+            << std::setw(20) << p.m_v.z << "\n";
+
+        return os;
     }
 
     virtual ~particle(){};

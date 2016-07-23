@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.8.11)
 project (hash_test)
 
-set(CMAKE_CXX_FLAGS "-g -Wall -std=c++14")
+set(CMAKE_CXX_FLAGS "-g -Wall -std=c++14 -pg")
 
 include_directories(../src)
 
@@ -11,5 +11,9 @@ add_executable(hash_test
 	../src/hash3_detail.h
 	../src/hash3_int3.h
 	../src/hash3_vector3.h
-	particle.h	
+	particle.h
+	particle_test.h
+	particle_test.cpp
+	scoped_timer.h
+	
 )

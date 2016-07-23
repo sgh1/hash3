@@ -342,6 +342,23 @@ class hash3 : public hash3_base<T>
         return ret;
 	}
 
+    std::vector<T> aggregate()
+	{
+	    std::vector<T> ret;
+
+	    ret.reserve(this->total());
+
+	    for( const auto& bin : m_bins)
+        {
+            for(const T& t : bin.second){
+                ret.push_back(t);
+            }
+        }
+
+        return ret;
+	}
+
+
     //copy or move a T into the hash
     template <typename U>
 	void insert(U&& t)
@@ -481,6 +498,11 @@ class hash3 : public hash3_base<T>
         for(int k = idx.z - 1 ; k < idx.z + 1; k++)
         {
             idx_t idx_cur(i,j,k);
+
+            if(m_bins.find(idx_cur) == m_bins.end()){
+                continue;
+            }
+
             typename bin_type<T>::type& cur_bin = m_bins[idx_cur];
 
             //still a little work to do, what should
