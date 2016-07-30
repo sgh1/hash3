@@ -10,6 +10,8 @@
 #include "hash3_vector3.h"
 #include "hash3_int3.h"
 
+#include <memory>
+
 namespace hash3
 {
 
@@ -72,29 +74,21 @@ struct remove_ptr<T*>{
     using type = T;
 };
 
-
-
-
 template<typename T>
-struct get_const_ref
-{
-    static const T& get(const T& t){
-        return t;
-    }
+struct remove_ptr<std::shared_ptr<T>>{
+    using type = T;
 };
 
 template<typename T>
-struct get_const_ref<T*>
-{
-    static const T& get(const T* t){
-
-        if(!t){
-            throw "nullptr";
-        }
-
-        return *t;
-    }
+struct remove_ptr<std::unique_ptr<T>>{
+    using type = T;
 };
+
+template<typename T>
+struct remove_ptr<std::weak_ptr<T>>{
+    using type = T;
+};
+
 
 }
 

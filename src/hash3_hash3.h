@@ -279,11 +279,11 @@ class hash3 : public hash3_base<T>
 {
     public:
 
-	typedef vector3<double>              my_vect3_t;
-	typedef int3<int>                    idx_t;
-	typedef typename remove_ptr<T>::type value_t;
+	typedef vector3<double>                 my_vect3_t;
+	typedef int3<int>                       idx_t;
+	typedef typename remove_ptr<T>::type    value_t;
 	typedef typename value_t::vect_type		vect3_t;
-	typedef bin_type<T> 				bin_t;
+	typedef bin_type<T> 				    bin_t;
 
 	using hash3_base<T>::m_d;
 	using hash3_base<T>::m_bins;
@@ -388,8 +388,7 @@ class hash3 : public hash3_base<T>
             }
 
             double cur_dist = dist2(
-                value_t::get_xyz(get_const_ref<T>::get(t)),
-                value_t::get_xyz(get_const_ref<T>::get(test)) );
+                value_t::get_xyz(t),value_t::get_xyz(test));
 
             if(cur_dist < nn.dist){
                 nn.it = it;
@@ -524,8 +523,7 @@ class hash3 : public hash3_base<T>
     idx_t hash_func(const T& t)
     {
         idx_t ret;
-        my_vect3_t  r =
-            my_vect3_t( value_t::get_xyz(get_const_ref<T>::get(t)) );
+        my_vect3_t  r = my_vect3_t( value_t::get_xyz(t));
 
         ret.x = r.x / this->m_d.x;
         ret.y = r.y / this->m_d.y;

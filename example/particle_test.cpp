@@ -1,6 +1,5 @@
 
 
-
 #include "particle_test.h"
 #include "scoped_timer.h"
 
@@ -147,6 +146,14 @@ namespace particle_test
 
 		f2.close();
 
+
+
+        std::ofstream f3("plot_hash3.py");
+
+        print_hash3_python_plot(storage,f3);
+
+        f3.close();
+
 	}
 
 	void create_hash3_ptr(const std::vector<particle>& particles){
@@ -162,6 +169,56 @@ namespace particle_test
 		storage.print(std::cout);
 
 	}
+
+	void print_hash3_python_plot(const hash3::hash3<particle>& particle_hash, std::ostream& os)
+	{
+        typedef myvect3d vect3_t;
+
+        auto itr = particle_hash.m_bins.begin();
+
+        while (itr != particle_hash.m_bins.end())
+        {
+            auto idx = itr->first;
+            auto idx2 = idx;
+            auto d_vect = particle_hash.m_d;
+
+            idx2.x++;
+            idx2.y++;
+            idx2.z++;
+
+            if(idx.x < 0){
+                idx2.x -= 2;
+            }
+
+            if(idx.y < 0){
+                idx2.y -= 2;
+            }
+
+            if(idx.z < 0){
+                idx2.z -= 2;
+            }
+
+            decltype(d_vect) p0( d_vect.x*idx.x,d_vect.y*idx.y,d_vect.z*idx.z);
+            decltype(d_vect) p1( d_vect.x*idx2.x,d_vect.y*idx2.y,d_vect.z*idx2.z);
+
+            std::stringstream ss;
+
+            ss << "draw_hash.draw_box(ax,["  << p0.x << "," << p0.y << "," << p0.z << "],["
+                                            << p1.x << "," << p1.y << "," << p1.z << "])\n";
+
+            os << ss.str();
+
+            itr++;
+
+            for(const auto& t : itr->second){
+
+                std::stringstream scatter_str;
+                scatter_str << "draw_hash.draw_particle(ax," << t.m_r.x << "," << t.m_r.y << "," << t.m_r.z << ")\n";
+                os << scatter_str.str();
+            }
+        }
+
+    }
 
 
 };
