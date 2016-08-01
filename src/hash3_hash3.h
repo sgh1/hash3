@@ -259,7 +259,7 @@ public:
 
 
     //give total Ts in hash
-	size_t total() const
+	size_t size() const
 	{
 	    size_t t = 0;
         for( auto const& bin : m_bins){
@@ -346,7 +346,7 @@ class hash3 : public hash3_base<T>
 	{
 	    std::vector<T> ret;
 
-	    ret.reserve(this->total());
+	    ret.reserve(this->size());
 
 	    for( const auto& bin : m_bins)
         {
@@ -411,7 +411,7 @@ class hash3 : public hash3_base<T>
         nn.it = m_bins[idx].end();
         nn.dist = std::numeric_limits<double>::max();
 
-        if(this->total() == 0){
+        if(this->size() == 0){
             return nn;
         }
 
@@ -452,7 +452,7 @@ class hash3 : public hash3_base<T>
         nn.it = m_bins[idx].end();
         nn.dist = std::numeric_limits<double>::max();
 
-        if(this->total() == 0){
+        if(this->size() == 0){
             return nn;
         }
 
@@ -487,7 +487,7 @@ class hash3 : public hash3_base<T>
     {
         idx_t idx = hash_func(test);
 
-        if(this->total() == 0){
+        if(this->size() == 0){
             return;
         }
 

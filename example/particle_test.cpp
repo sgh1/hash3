@@ -63,13 +63,13 @@ namespace particle_test
 			hash3::hash3<particle>::my_vect3_t(2.,2.,2.));
 
 		particle p( vect3_t(0.0,0.0,0.0 ),
-					vect3_t(2.0,2.0,2.0 ), storage.total() );
+					vect3_t(2.0,2.0,2.0 ), storage.size() );
 
 		storage.nearest_neighbor_in_bin(p);
 		storage.nearest_neighbor(particles.back());
 		storage.print(std::cout);
 
-		std::cout << "total T's: " << storage.total() << "\n";
+		std::cout << "total T's: " << storage.size() << "\n";
 
 		{
 			scoped_timer timer("\nelapsed time, naive search:");
