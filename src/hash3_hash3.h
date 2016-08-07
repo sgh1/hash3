@@ -18,9 +18,10 @@
 #include <limits>
 #include <utility>      // swap
 
-#include "hash3_vector3.h"
-#include "hash3_int3.h"
+#include "hash3_aabb.h"
 #include "hash3_detail.h"
+#include "hash3_int3.h"
+#include "hash3_vector3.h"
 
 namespace hash3
 {
@@ -481,7 +482,7 @@ class hash3 : public hash3_base<T>
 
     //I think we want U&& here. we ant U&& to be
     //somethin related to T, but it can be hacked, I suppose,
-    //to do other things
+    //to do other things, like nearest to a different type
     template<typename U, typename FUNC>
     void for_each_neighbor(U& test, const FUNC& f)
     {
@@ -519,6 +520,29 @@ class hash3 : public hash3_base<T>
         return;
     }
 
+    //I think we want U&& here. we ant U&& to be
+    //somethin related to T, but it can be hacked, I suppose,
+    //to do other things
+    template<typename RAY, typename FUNC>
+    void ray_intersect(const RAY& ray, const FUNC& f)
+    {
+        for( auto& bin : m_bins)
+        {
+            aabb<double> bb =
+                get_bb<use_expanded_bb<T>::value>::get(
+                    bin.first,m_d);
+
+            if(bb.ray_intersect(ray))
+            {
+                //not sure what the best thing to do here is
+                //but we'll leave it to the client to have
+                //its own ref. to ray in one way or another
+                for(/*const*/ auto& t : bin.second){
+                    f(t);
+                }
+            }
+        }
+    }
 
     idx_t hash_func(const T& t)
     {

@@ -1,6 +1,7 @@
 
 
 #include "particle_test.h"
+#include "ray.h"
 #include "scoped_timer.h"
 
 #include "hash3_hash3.h"
@@ -11,6 +12,7 @@
 #include <fstream>
 #include <iostream>
 #include <random>
+#include <set>
 
 namespace particle_test
 {
@@ -60,7 +62,7 @@ namespace particle_test
 		typedef myvect3d vect3_t;
 
 		hash3::hash3<particle> storage(particles,
-			hash3::hash3<particle>::my_vect3_t(2.,2.,2.));
+			hash3::hash3<particle>::my_vect3_t(1.,1.,1.));
 
 		particle p( vect3_t(0.0,0.0,0.0 ),
 					vect3_t(2.0,2.0,2.0 ), storage.size() );
@@ -152,7 +154,26 @@ namespace particle_test
 
         print_hash3_python_plot(storage,f3);
 
+        //f3.close();
+
+
+        std::set<hash3::hash3<particle>::idx_t> ray_traced_bins;
+
+        ray r(  myvect3d(12,12,12),
+                myvect3d(-1/sqrt(3.0),-1/sqrt(3.0),-1/sqrt(3.0)));
+
+        storage.ray_intersect(r,[&](particle& p)
+        {
+            ray_traced_bins.insert( storage.hash_func(p));
+        });
+
+
+        f3 << "\n";
+        print_hash3_python_plot_selected_bins(storage,ray_traced_bins,f3);
+
         f3.close();
+
+
 
 	}
 
@@ -217,7 +238,44 @@ namespace particle_test
                 os << scatter_str.str();
             }
         }
+    }
 
+    void print_hash3_python_plot_selected_bins(
+        const hash3::hash3<particle>& particles, const std::set<hash3::hash3<particle>::idx_t>& idxs, std::ostream& os)
+    {
+
+        for(const auto& f : idxs)
+        {
+            auto idx = f;
+            auto idx2 = idx;
+            auto d_vect = particles.m_d;
+
+            idx2.x++;
+            idx2.y++;
+            idx2.z++;
+
+            if(idx.x < 0){
+                idx2.x -= 2;
+            }
+
+            if(idx.y < 0){
+                idx2.y -= 2;
+            }
+
+            if(idx.z < 0){
+                idx2.z -= 2;
+            }
+
+            decltype(d_vect) p0( d_vect.x*idx.x,d_vect.y*idx.y,d_vect.z*idx.z);
+            decltype(d_vect) p1( d_vect.x*idx2.x,d_vect.y*idx2.y,d_vect.z*idx2.z);
+
+            std::stringstream ss;
+
+            ss << "draw_hash.draw_box(ax,["  << p0.x << "," << p0.y << "," << p0.z << "],["
+                                            << p1.x << "," << p1.y << "," << p1.z << "],'r')\n";
+
+            os << ss.str();
+        }
     }
 
 

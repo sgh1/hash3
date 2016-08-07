@@ -13,6 +13,7 @@
 
 
 #include <iosfwd>
+#include <set>
 #include <vector>
 
 namespace particle_test
@@ -22,6 +23,8 @@ namespace particle_test
 	void create_hash3_ptr(const std::vector<particle>& particles);
 
 	void print_hash3_python_plot(const hash3::hash3<particle>& particles, std::ostream& os);
+	void print_hash3_python_plot_selected_bins(
+        const hash3::hash3<particle>& particles, const std::set<hash3::hash3<particle>::idx_t>& idxs, std::ostream& os);
 
 
 };

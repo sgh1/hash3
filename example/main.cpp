@@ -13,7 +13,7 @@ int main( int argc, char* argv[] ){
     std::default_random_engine e1(r());
     std::uniform_real_distribution<double> uniform_dist(0, 10.0);
 
-    for(int i = 0; i < 50; i++)
+    for(int i = 0; i < 1000; i++)
     {
         particles.push_back( particle(  vect3_t(uniform_dist(e1),uniform_dist(e1),uniform_dist(e1) ),
                                         vect3_t(uniform_dist(e1),uniform_dist(e1),uniform_dist(e1) ), i ) );
